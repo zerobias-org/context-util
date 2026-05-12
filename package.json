@@ -27,28 +27,31 @@
     "npm": ">=10.0.0"
   },
   "overrides": {
-    "@zerobias-org/types-core-js": "$@zerobias-org/types-core-js"
+    "@zerobias-org/types-core-js": "$@zerobias-org/types-core-js",
+    "axios": "1.16.0",
+    "diff": "^8.0.3",
+    "serialize-javascript": "^7.0.5"
   },
   "dependencies": {
-    "@zerobias-com/platform-sdk": "^1.1.5",
+    "@zerobias-com/platform-sdk": "1.1.17",
     "@zerobias-org/hub-sdk-interface-dataproducer": "^2.1.4",
-    "@zerobias-org/logger": "^3.0.10",
+    "@zerobias-org/logger": "3.0.10",
     "@zerobias-org/module-interface-dataproducer": "^2.1.4",
     "@zerobias-org/types-core": "^1.0.22",
     "@zerobias-org/types-core-js": "^1.2.19",
-    "@zerobias-org/util-connector": "^1.0.41",
-    "@zerobias-org/zbb": "^0.3.55",
-    "axios": "^1.16.0",
-    "csv-parse": "^6.0.0",
-    "jsonata": "^2.0.0",
-    "yaml": "^2.8.3"
+    "@zerobias-org/util-connector": "1.0.41",
+    "@zerobias-org/zbb": "0.3.69",
+    "axios": "1.16.0",
+    "csv-parse": "^6.2.1",
+    "jsonata": "^2.1.1",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.0.0",
-    "@zerobias-org/devops-tools": "^1.0.52",
-    "@zerobias-org/eslint-config": "^1.0.31",
+    "@zerobias-org/devops-tools": "^1.0.54",
+    "@zerobias-org/eslint-config": "^1.0.39",
     "chai": "^6.0.0",
     "mocha": "^11.7.5",
     "rimraf": "^6.1.0",

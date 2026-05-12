@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "branch": "main",
+  "packages": {
+    "@zerobias-org/data-utils": {
+      "version": "2.1.4",
+      "sourceHash": "b8a79c2fedc3ad1dbdd4d135a2b230785c5b03c7b28bdfacc7135ad3e1ef6d2a",
+      "testHash": "31bcf4a9cc35001de836df01a9297b53c1d3833ff425abe7b6c3142f6b4001d4",
+      "tasks": {
+        "lint": "passed",
+        "compile": "passed",
+        "copyDeps": "passed",
+        "generate": "passed",
+        "transpile": "passed",
+        "test": "passed"
+      },
+      "tests": {
+        "unit": {
+          "expected": 1,
+          "ran": 1,
+          "status": "passed"
+        },
+        "integration": {
+          "expected": 0,
+          "ran": 0,
+          "status": "skipped"
+        },
+        "e2e": {
+          "expected": 0,
+          "ran": 0,
+          "status": "skipped"
+        }
+      },
+      "rootDeps": {
+        "@zerobias-org/hub-sdk-interface-dataproducer": "^2.1.4",
+        "@zerobias-org/module-interface-dataproducer": "^2.1.4",
+        "@zerobias-org/types-core": "^1.0.22",
+        "@zerobias-org/types-core-js": "\"$@zerobias-org/types-core-js\"",
+        "@zerobias-org/util-connector": "1.0.41",
+        "jsonata": "^2.1.1",
+        "yaml": "^2.9.0",
+        "axios": "\"1.16.0\"",
+        "diff": "\"^8.0.3\"",
+        "serialize-javascript": "\"^7.0.5\""
+      }
+    },
+    "@zerobias-org/util-collector": {
+      "version": "1.0.41",
+      "sourceHash": "848ebe359ee30bfd46627bda226c475794b8b806884d15aa67868f893388fca0",
+      "testHash": "538007cc6c8a0c66415559ba2d3c2c8059f58b3476939056f98460ba5ca91647",
+      "tasks": {
+        "lint": "passed",
+        "compile": "passed",
+        "copyDeps": "passed",
+        "generate": "passed",
+        "transpile": "passed",
+        "test": "passed"
+      },
+      "tests": {
+        "unit": {
+          "expected": 1,
+          "ran": 1,
+          "status": "passed"
+        },
+        "integration": {
+          "expected": 0,
+          "ran": 0,
+          "status": "skipped"
+        },
+        "e2e": {
+          "expected": 0,
+          "ran": 0,
+          "status": "skipped"
+        }
+      },
+      "rootDeps": {
+        "@zerobias-com/platform-sdk": "1.1.17",
+        "@zerobias-org/logger": "3.0.10",
+        "@zerobias-org/types-core-js": "\"$@zerobias-org/types-core-js\"",
+        "@zerobias-org/util-connector": "1.0.41",
+        "axios": "\"1.16.0\"",
+        "csv-parse": "^6.2.1",
+        "yaml": "^2.9.0",
+        "diff": "\"^8.0.3\"",
+        "serialize-javascript": "\"^7.0.5\""
+      }
+    }
+  }
+}
