@@ -1,0 +1,170 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+env:
+  ZB_TOKEN: ${{ secrets.ZB_TOKEN }}
+  NPM_TOKEN: ${{ secrets.READ_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  READ_TOKEN: ${{ secrets.READ_TOKEN }}
+  SLACK_DEVOPS_NOTIFICATIONS: ${{ secrets.SLACK_DEVOPS_NOTIFICATIONS }}
+  # NOTE: ZB_SLOT is intentionally NOT set at workflow level — gate-check
+  # is slot-less and the published zbb version eagerly loads ZB_SLOT if it
+  # sees it set, which fails when no bootstrap step has run. ZB_SLOT is
+  # set per-job below only on jobs that actually bootstrap a slot.
+
+jobs:
+  gate-check:
+    name: Gate Stamp Check
+    runs-on: ubuntu-latest
+    outputs:
+      stamp_valid: ${{ steps.check_stamp.outputs.valid }}
+
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies
+        run: |
+          cp .npmrc $HOME/.npmrc
+          npm ci
+        env:
+          NPM_TOKEN: ${{ env.READ_TOKEN }}
+          ZB_TOKEN: ${{ env.ZB_TOKEN }}
+
+      # gate --check is the slot-less fast path: stamp validation only,
+      # no slot, no stack, no preflight. Routes through ./gradlew
+      # monorepoGateCheck via the lifecycle dispatch.
+      - name: Check gate stamp
+        id: check_stamp
+        run: |
+          if npx zbb gate --check; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          READ_TOKEN: ${{ env.READ_TOKEN }}
+
+  gate-run:
+    name: Run Gate
+    needs: [gate-check]
+    if: needs.gate-check.outputs.stamp_valid == 'false'
+    runs-on: ubuntu-latest
+    env:
+      ZB_SLOT: ci-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+      - name: Acquire cache
+        uses: actions/cache@v4
+        with:
+          path: .git
+          key: repo-git-folder
+
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Configure git user
+        run: |
+          git config --global user.email "ci@neverfail.com"
+          git config --global user.name "@$GITHUB_ACTOR"
+
+      - name: Install dependencies
+        run: |
+          cp .npmrc $HOME/.npmrc
+          npm ci
+        env:
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
+          ZB_TOKEN: ${{ env.ZB_TOKEN }}
+
+      # Bootstrap an ephemeral slot for this CI run. CI mode (auto-detected
+      # from CI=true) snapshots process.env as slot overrides — secrets
+      # exported by previous workflow steps are picked up directly without
+      # the slot needing to re-fetch from Vault.
+      - name: Bootstrap zbb slot
+        run: |
+          npx zbb slot create $ZB_SLOT --ephemeral
+          npx zbb stack add .
+        env:
+          CI: 'true'
+          NPM_TOKEN: ${{ env.READ_TOKEN }}
+          ZB_TOKEN: ${{ env.ZB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          READ_TOKEN: ${{ env.READ_TOKEN }}
+
+      - name: Run zbb gate
+        run: npx zbb gate
+        env:
+          CI: 'true'
+          NPM_TOKEN: ${{ env.READ_TOKEN }}
+          ZB_TOKEN: ${{ env.ZB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          READ_TOKEN: ${{ env.READ_TOKEN }}
+
+      - name: Commit and push gate stamp
+        run: |
+          git add gate-stamp.json
+          if git diff --cached --quiet; then
+            echo "No changes to gate-stamp.json"
+          else
+            git commit -m "chore: update gate-stamp.json"
+            git push
+          fi
+
+      - name: Slack Notification on failure
+        uses: slackapi/slack-github-action@v2.0.0
+        if: failure()
+        with:
+          webhook: ${{ env.SLACK_DEVOPS_NOTIFICATIONS }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": ":fire: context-util pull request gate failed",
+              "attachments": [
+                {
+                  "color": "danger",
+                  "text": "<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
+                }
+              ]
+            }
