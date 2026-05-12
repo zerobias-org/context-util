@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────────────
+# Context-Util Repo Stack Manifest (Phase 3 single-file model)
+# ──────────────────────────────────────────────────────────────────────
+#
+# org/context-util houses packages that sit logically above the build
+# infrastructure in org/util (collector, data-utils). They consume the
+# hub-sdk / module-interface packages which themselves consume
+# util-connector — pulling them out of org/util breaks the publish-order
+# cycle.
+
+name: "@zerobias-org/context-util"
+version: "1.0.0"
+
+# ── Environment ───────────────────────────────────────────────────────
+# Publishing credentials only — context-util doesn't ship JVM artifacts,
+# so no Sonatype/GPG vars. Same vault paths org/util uses for GitHub
+# Packages auth.
+env:
+  GITHUB_ACTOR:
+    source: env
+    required: true
+    description: "GitHub username for package publishing."
+  GITHUB_TOKEN:
+    source: env
+    required: true
+    mask: true
+    description: "GitHub PAT with write:packages scope."
+
+# ── Tool preflight ────────────────────────────────────────────────────
+require:
+  - node
+  - java
+
+# ── Lifecycle delegation ──────────────────────────────────────────────
+lifecycle:
+  clean:           ./gradlew monorepoClean
+  build:           ./gradlew monorepoBuild
+  test:            ./gradlew monorepoTest
+  testIntegration: ./gradlew monorepoTestIntegration
+  gate:            ./gradlew monorepoGate
+  gateCheck:       ./gradlew monorepoGateCheck
+  publish:         ./gradlew monorepoPublish
+
+tools:
+  node:
+    check: "node --version"
+    parse: "v(\\S+)"
+    version: ">=22"
+    install: "nvm install 22"
+
+  java:
+    check: "bash -c '$JAVA_HOME/bin/java -version 2>&1'"
+    parse: 'version "(\S+)"'
+    version: "21"
+    install: "apt install openjdk-21-jdk"
+
+# ── Monorepo orchestration (consumed by Gradle plugins) ───────────────
+monorepo:
+  registry: https://npm.pkg.github.com/
+  sourceDirs: [src, lib]
+  sourceFiles: [tsconfig.json, package.json]
+  buildPhases: [lint, compile, copyDeps, generate, transpile]
+  testPhases: [test]
+  skipPublish: []

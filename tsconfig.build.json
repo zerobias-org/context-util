@@ -1,0 +1,7 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/collector" },
+    { "path": "./packages/data-utils" }
+  ]
+}
