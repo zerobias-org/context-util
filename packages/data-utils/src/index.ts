@@ -26,8 +26,13 @@ export { DataMapper } from './mapper/DataMapper.js';
 export {
   extractRows,
   inferSchemaFromRows,
-  diffSchemas
+  diffSchemas,
+  // Saved-query resolution: turn a `DataMapping.source` + the pipeline's
+  // `params.queries` registry into the actual SQL string to execute.
+  resolveSavedQuery,
+  resolveMappingSql
 } from './mapper/utils/query.js';
+export type { SavedQueryRegistry } from './mapper/utils/query.js';
 // Export mapper types explicitly to avoid conflicts with transform types
 export type {
   SourceField,
@@ -50,7 +55,9 @@ export type {
   InvokeFunction,
   InferredSchema,
   SchemaProperty,
-  SchemaDiff
+  SchemaDiff,
+  // Pipeline-level saved query (referenced by mappings via `sourceQueryKey`).
+  PipelineSavedQuery
 } from './mapper/types/index.js';
 
 // DataProducer client (framework-agnostic)

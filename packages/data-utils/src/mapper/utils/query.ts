@@ -10,6 +10,7 @@ import {
   SchemaDiff,
   SchemaProperty,
 } from '../types/query.types.js';
+import { PipelineSavedQuery } from '../types/mapping.types.js';
 
 /**
  * Normalise the result of a producer function invocation to a plain row
@@ -114,6 +115,81 @@ export function diffSchemas(
   }
 
   return { added, removed, changed, unchanged };
+}
+
+/**
+ * Pipeline-saved-query registry: the `pipeline.params.queries` shape
+ * accepted by `resolveSavedQuery` / `resolveMappingSql`. Pipelines
+ * persist queries as a `Record<string, PipelineSavedQuery>` keyed by
+ * the entry's own `key`; for convenience this helper also accepts the
+ * plain-array form (`PipelineSavedQuery[]`) so callers iterating one
+ * way and looking up the other don't need to convert manually.
+ *
+ * `null` and `undefined` are accepted to mirror real-world inputs:
+ * `pipeline.params` is free-form and may legitimately omit `queries`.
+ */
+export type SavedQueryRegistry =
+  | Record<string, PipelineSavedQuery>
+  | PipelineSavedQuery[]
+  | null
+  | undefined;
+
+/**
+ * Return the `PipelineSavedQuery` entry for `key`, or `undefined` when
+ * the registry is empty, the key is missing / falsy, or the entry has
+ * been removed out-of-band (e.g. via the manage-queries dialog).
+ *
+ * Accepts both registry shapes so callers can pass `pipeline.params.queries`
+ * directly without normalising.
+ */
+export function resolveSavedQuery(
+  key: string | null | undefined,
+  registry: SavedQueryRegistry,
+): PipelineSavedQuery | undefined {
+  if (!key || !registry) return undefined;
+  if (Array.isArray(registry)) {
+    return registry.find((q) => q?.key === key);
+  }
+  return registry[key];
+}
+
+/**
+ * Resolve the SQL string for a `DataMapping.source` to send to the
+ * producer's `query` function. Implements the back-compat resolution
+ * rule shared by the UI and the pipeline runner:
+ *
+ *   1. If `source.sourceQueryKey` is set → look it up in `registry` and
+ *      return the entry's `query` string. Returns `undefined` when the
+ *      key is missing from the registry (caller decides whether to
+ *      treat that as an error or silently skip the mapping).
+ *   2. Else if `source.sql` is set (legacy inline path) → return as-is.
+ *      Mappings written before the saved-queries feature landed still
+ *      carry their SQL directly on the source.
+ *   3. Else → `undefined` (collection-backed mappings have no SQL).
+ *
+ * The `source` parameter is structurally typed so any object with the
+ * relevant fields works — no need to import the UI's full
+ * `DataMappingSource` shape on the runner side.
+ *
+ * @example
+ * ```ts
+ * const sql = resolveMappingSql(mapping.source, pipeline.params.queries);
+ * if (!sql) {
+ *   // collection mapping or stale sourceQueryKey — skip / route differently
+ *   continue;
+ * }
+ * await invokeFunction(mapping.source.objectId, { sql });
+ * ```
+ */
+export function resolveMappingSql(
+  source: { sourceQueryKey?: string | null; sql?: string | null } | null | undefined,
+  registry: SavedQueryRegistry,
+): string | undefined {
+  if (!source) return undefined;
+  if (source.sourceQueryKey) {
+    return resolveSavedQuery(source.sourceQueryKey, registry)?.query;
+  }
+  return source.sql ?? undefined;
 }
 
 // ---- internals ----
