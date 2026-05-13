@@ -5,7 +5,7 @@
     "@zerobias-org/data-utils": {
       "version": "2.1.5",
       "sourceHash": "169f19c1f5e5b01de1477ae5923665f80c5b58f4b60e794f3687c383b3e2553d",
-      "testHash": "31bcf4a9cc35001de836df01a9297b53c1d3833ff425abe7b6c3142f6b4001d4",
+      "testHash": "6f60383c6e6b89664d58bbf274d7a616bfd30a61a8a623b34beea3fdb66c6a8a",
       "tasks": {
         "lint": "passed",
         "compile": "passed",
