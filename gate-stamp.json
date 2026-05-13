@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "branch": "main",
+  "branch": "feat/dynamic-data-queries",
   "packages": {
     "@zerobias-org/data-utils": {
-      "version": "2.1.4",
-      "sourceHash": "b8a79c2fedc3ad1dbdd4d135a2b230785c5b03c7b28bdfacc7135ad3e1ef6d2a",
+      "version": "2.1.5",
+      "sourceHash": "169f19c1f5e5b01de1477ae5923665f80c5b58f4b60e794f3687c383b3e2553d",
       "testHash": "31bcf4a9cc35001de836df01a9297b53c1d3833ff425abe7b6c3142f6b4001d4",
       "tasks": {
         "lint": "passed",
@@ -16,8 +16,8 @@
       },
       "tests": {
         "unit": {
-          "expected": 1,
-          "ran": 1,
+          "expected": 12,
+          "ran": 12,
           "status": "passed"
         },
         "integration": {
@@ -45,7 +45,7 @@
       }
     },
     "@zerobias-org/util-collector": {
-      "version": "1.0.41",
+      "version": "1.0.42",
       "sourceHash": "848ebe359ee30bfd46627bda226c475794b8b806884d15aa67868f893388fca0",
       "testHash": "538007cc6c8a0c66415559ba2d3c2c8059f58b3476939056f98460ba5ca91647",
       "tasks": {
