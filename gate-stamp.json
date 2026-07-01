@@ -46,7 +46,7 @@
     },
     "@zerobias-org/util-collector": {
       "version": "1.0.42",
-      "sourceHash": "848ebe359ee30bfd46627bda226c475794b8b806884d15aa67868f893388fca0",
+      "sourceHash": "9658633ea0e766b6a10d7a109c24f649790aa651c0404bb5462b32d68ebf5469",
       "testHash": "538007cc6c8a0c66415559ba2d3c2c8059f58b3476939056f98460ba5ca91647",
       "tasks": {
         "lint": "passed",
