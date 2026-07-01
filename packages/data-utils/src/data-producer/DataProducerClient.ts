@@ -117,7 +117,7 @@ export class DataProducerClient {
         ? new UUID(connectionConfig.targetId)
         : connectionConfig.targetId;
 
-      // Convert orgId to UUID if provided as a string (HubConnectionProfile.orgId is a UUID).
+      // Convert orgId to UUID if provided as a string (HubConnectionProfile.orgId is a UUID)
       const orgId = connectionConfig.orgId
         ? (typeof connectionConfig.orgId === 'string' ? new UUID(connectionConfig.orgId) : connectionConfig.orgId)
         : undefined;
