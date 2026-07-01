@@ -117,10 +117,16 @@ export class DataProducerClient {
         ? new UUID(connectionConfig.targetId)
         : connectionConfig.targetId;
 
+      // Convert orgId to UUID if provided as a string (HubConnectionProfile.orgId is a UUID).
+      const orgId = connectionConfig.orgId
+        ? (typeof connectionConfig.orgId === 'string' ? new UUID(connectionConfig.orgId) : connectionConfig.orgId)
+        : undefined;
+
       const connectionProfile: HubConnectionProfile = {
         server: connectionConfig.server,
         targetId: targetId,
         session: config && config.session ? new UUID(config.session.toString()) : undefined,
+        orgId: orgId,
         ...(connectionConfig.headers && { headers: connectionConfig.headers }),
         ...(connectionConfig.timeout && { timeout: connectionConfig.timeout })
       };

@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "branch": "feat/dynamic-data-queries",
+  "branch": "main",
   "packages": {
     "@zerobias-org/data-utils": {
-      "version": "2.1.5",
-      "sourceHash": "169f19c1f5e5b01de1477ae5923665f80c5b58f4b60e794f3687c383b3e2553d",
+      "version": "2.1.6",
+      "sourceHash": "b35a683a64cca22fed1b6418402091b316dc286bbfad18f5a6c2008f426d16be",
       "testHash": "6f60383c6e6b89664d58bbf274d7a616bfd30a61a8a623b34beea3fdb66c6a8a",
       "tasks": {
         "lint": "passed",

@@ -25,6 +25,11 @@ export interface DataProducerConfig {
   session?: UUID | string;
 
   /**
+   * Org ID — forwarded onto the HubConnectionProfile so the producer resolves against the right org.
+   */
+  orgId?: UUID | string;
+
+  /**
    * Optional timeout in milliseconds
    */
   timeout?: number;
