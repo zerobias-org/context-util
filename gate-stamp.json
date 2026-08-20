@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "branch": "main",
+  "branch": "fix/data-utils-v2-line",
   "packages": {
     "@zerobias-org/data-utils": {
-      "version": "2.1.6",
-      "sourceHash": "48dec511200bc6f7f2e504784c8883b21ccff74ceaaaa3e0287c8df148169d06",
+      "version": "2.1.7",
+      "sourceHash": "ccf985fa987d9d85547feb6faf987252576dc82a13d573771b539f5e90568b36",
       "testHash": "6f60383c6e6b89664d58bbf274d7a616bfd30a61a8a623b34beea3fdb66c6a8a",
       "tasks": {
         "lint": "passed",
@@ -32,11 +32,10 @@
         }
       },
       "rootDeps": {
-        "@zerobias-org/hub-sdk-interface-dataproducer": "^2.1.4",
-        "@zerobias-org/module-interface-dataproducer": "^2.1.4",
-        "@zerobias-org/types-core": "^1.0.22",
+        "@zerobias-org/hub-sdk-interface-dataproducer": "^2.2.4",
+        "@zerobias-org/module-interface-dataproducer": "^2.2.4",
+        "@zerobias-org/types-core": "^2.0.2",
         "@zerobias-org/types-core-js": "\"$@zerobias-org/types-core-js\"",
-        "@zerobias-org/util-connector": "1.0.41",
         "jsonata": "^2.1.1",
         "yaml": "^2.9.0",
         "axios": "\"1.16.0\"",
@@ -46,7 +45,7 @@
     },
     "@zerobias-org/util-collector": {
       "version": "1.0.42",
-      "sourceHash": "9658633ea0e766b6a10d7a109c24f649790aa651c0404bb5462b32d68ebf5469",
+      "sourceHash": "f3ed50aa44bfbcf455455d14e4cd163ffbe9a908e5ee47da7b295caffe254d0f",
       "testHash": "538007cc6c8a0c66415559ba2d3c2c8059f58b3476939056f98460ba5ca91647",
       "tasks": {
         "lint": "passed",
@@ -74,10 +73,9 @@
         }
       },
       "rootDeps": {
-        "@zerobias-com/platform-sdk": "1.1.17",
-        "@zerobias-org/logger": "3.0.10",
+        "@zerobias-com/platform-sdk": "^2.0.22",
+        "@zerobias-org/logger": "^4.0.1",
         "@zerobias-org/types-core-js": "\"$@zerobias-org/types-core-js\"",
-        "@zerobias-org/util-connector": "1.0.41",
         "axios": "\"1.16.0\"",
         "csv-parse": "^6.2.1",
         "yaml": "^2.9.0",
