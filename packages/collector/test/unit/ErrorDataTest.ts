@@ -41,6 +41,60 @@ describe('toBatchLogData', () => {
     expect(toBatchLogData(err).statusCode).to.equal(503);
   });
 
+  // The direct shape below was covered; a WRAPPED error was not. `cause` is an own property, so
+  // getOwnPropertyNames finds it, and a top-level-only filter handed the token straight back.
+  it('never copies credentials out of a nested cause either', () => {
+    const axiosErr = Object.assign(new Error('Request failed'), {
+      config: { headers: { Authorization: 'Bearer super-secret' } },
+      response: { status: 500 },
+    });
+    const wrapped = new Error('Unable to load user', { cause: axiosErr });
+
+    const serialized = JSON.stringify(toBatchLogData(wrapped));
+
+    expect(serialized).to.not.contain('super-secret');
+    expect(serialized).to.not.contain('Authorization');
+    // The cause itself is the most useful diagnostic, so it is kept — just sanitized.
+    expect(serialized).to.contain('Request failed');
+  });
+
+  it('bounds a nested value, not just a top-level string', () => {
+    // Truncation used to apply only to `typeof value === 'string'` at the top level, so anything
+    // under _model, cause or a custom property was unbounded.
+    const err = Object.assign(new Error('boom'), { _model: { blob: 'x'.repeat(50_000) } });
+    expect(JSON.stringify(toBatchLogData(err))).to.have.length.lessThan(20_000);
+  });
+
+  it('survives a circular value instead of throwing', () => {
+    // This runs while a collector is already reporting a failure. The previous `data ?? {}` could
+    // not throw, so neither may this.
+    const err: any = Object.assign(new Error('boom'), { ctx: {} });
+    err.ctx.self = err.ctx;
+
+    const out = toBatchLogData(err);
+
+    expect(() => JSON.stringify(out)).to.not.throw();
+    expect(JSON.stringify(out)).to.contain('[circular]');
+  });
+
+  it('survives a bigint, which JSON.stringify refuses outright', () => {
+    const err = Object.assign(new Error('boom'), { attempt: 9007199254740993n });
+    expect(() => JSON.stringify(toBatchLogData(err))).to.not.throw();
+  });
+
+  it('caps the whole payload, keeping the fields the classifier reads', () => {
+    const err = Object.assign(new Error('boom'), {
+      statusCode: 429,
+      details: Array.from({ length: 400 }, (_, i) => ({ i, blob: 'y'.repeat(200) })),
+    });
+
+    const out = toBatchLogData(err);
+
+    expect(JSON.stringify(out)).to.have.length.lessThan(20_000);
+    expect(out.msg).to.equal('boom');
+    expect(out.statusCode).to.equal(429);
+  });
+
   it('never copies the axios request, which carries the connection credentials', () => {
     const err = Object.assign(new Error('Request failed'), {
       config: { headers: { Authorization: 'Bearer super-secret' } },
