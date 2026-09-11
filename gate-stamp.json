@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "branch": "fix/data-utils-v2-line",
+  "branch": "fix/batch-log-error-serialization",
   "packages": {
     "@zerobias-org/data-utils": {
-      "version": "2.1.7",
+      "version": "2.1.8",
       "sourceHash": "ccf985fa987d9d85547feb6faf987252576dc82a13d573771b539f5e90568b36",
       "testHash": "6f60383c6e6b89664d58bbf274d7a616bfd30a61a8a623b34beea3fdb66c6a8a",
       "tasks": {
@@ -44,9 +44,9 @@
       }
     },
     "@zerobias-org/util-collector": {
-      "version": "1.0.42",
-      "sourceHash": "f3ed50aa44bfbcf455455d14e4cd163ffbe9a908e5ee47da7b295caffe254d0f",
-      "testHash": "538007cc6c8a0c66415559ba2d3c2c8059f58b3476939056f98460ba5ca91647",
+      "version": "1.0.43",
+      "sourceHash": "2d38b65ada17e53f55a348376e08f3bef6660dfff9693b066d0aac445f9a2802",
+      "testHash": "a96686a5ab085e6bf6bc89feb765b1a80f6c2f3a72eba95b580dd6c73363630e",
       "tasks": {
         "lint": "passed",
         "compile": "passed",
@@ -57,8 +57,8 @@
       },
       "tests": {
         "unit": {
-          "expected": 1,
-          "ran": 1,
+          "expected": 15,
+          "ran": 15,
           "status": "passed"
         },
         "integration": {
