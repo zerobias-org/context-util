@@ -14,6 +14,8 @@ import {
 } from '@zerobias-com/platform-sdk';
 import type { LoggerEngine } from '@zerobias-org/logger';
 
+import { toBatchLogData } from './errorData.js';
+
 /**
  * Batch item with payload and optional raw data
  */
@@ -158,7 +160,7 @@ export class Batch<T extends object = Record<string, unknown>> {
       const batchLog: NewBatchLog = {
         message,
         logLevel: level,
-        data: data ?? {},
+        data: toBatchLogData(data),
       };
       await this.platform.getBatchApi().createBatchLog(this.batchId, batchLog);
     }

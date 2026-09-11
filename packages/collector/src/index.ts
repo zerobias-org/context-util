@@ -49,3 +49,6 @@ export {
   type BatchItem,
   type BatchEntry,
 } from './batch.js';
+
+// Error serialization
+export { toBatchLogData } from './errorData.js';

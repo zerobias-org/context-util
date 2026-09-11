@@ -20,11 +20,20 @@ env:
     source: env
     required: true
     description: "GitHub username for package publishing."
+  # Declared the same way com/dana declares it; the workflow maps it to
+  # secrets.READ_TOKEN. settings.gradle.kts reads it as the second entry in the
+  # credential chain for maven.pkg.github.com/zerobias-org/util.
+  NPM_TOKEN:
+    type: string
+    source: env
+    required: true
+    mask: true
+    description: "Token for authenticating to Zerobias github packages."
   GITHUB_TOKEN:
     source: env
     required: true
     mask: true
-    description: "GitHub PAT with write:packages scope."
+    description: "Actions-provided token. Last entry in the Gradle credential chain."
 
 # ── Tool preflight ────────────────────────────────────────────────────
 require:
