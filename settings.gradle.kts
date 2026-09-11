@@ -16,9 +16,14 @@ pluginManagement {
             url = uri("https://maven.pkg.github.com/zerobias-org/util")
             credentials {
                 username = System.getenv("GITHUB_ACTOR") ?: "zerobias-org"
-                password = System.getenv("READ_TOKEN")
-                    ?: System.getenv("NPM_TOKEN")
-                    ?: System.getenv("GITHUB_TOKEN")
+                // takeIf(isNotBlank) because `?:` only falls through on NULL, and Actions sets an
+                // UNSET secret to the empty string. So a missing READ_TOKEN stopped the chain at
+                // "" rather than trying NPM_TOKEN or GITHUB_TOKEN, and Gradle authenticated with
+                // an empty password -- which GitHub Packages treats as anonymous and rejects 401.
+                // (Verified that the username is irrelevant here: any username with a valid token
+                // returns 200, and only the anonymous request returns 401.)
+                password = listOf("READ_TOKEN", "NPM_TOKEN", "GITHUB_TOKEN")
+                    .firstNotNullOfOrNull { System.getenv(it)?.takeIf(String::isNotBlank) }
                     ?: ""
             }
         }
@@ -34,9 +39,14 @@ buildscript {
             url = uri("https://maven.pkg.github.com/zerobias-org/util")
             credentials {
                 username = System.getenv("GITHUB_ACTOR") ?: "zerobias-org"
-                password = System.getenv("READ_TOKEN")
-                    ?: System.getenv("NPM_TOKEN")
-                    ?: System.getenv("GITHUB_TOKEN")
+                // takeIf(isNotBlank) because `?:` only falls through on NULL, and Actions sets an
+                // UNSET secret to the empty string. So a missing READ_TOKEN stopped the chain at
+                // "" rather than trying NPM_TOKEN or GITHUB_TOKEN, and Gradle authenticated with
+                // an empty password -- which GitHub Packages treats as anonymous and rejects 401.
+                // (Verified that the username is irrelevant here: any username with a valid token
+                // returns 200, and only the anonymous request returns 401.)
+                password = listOf("READ_TOKEN", "NPM_TOKEN", "GITHUB_TOKEN")
+                    .firstNotNullOfOrNull { System.getenv(it)?.takeIf(String::isNotBlank) }
                     ?: ""
             }
         }
