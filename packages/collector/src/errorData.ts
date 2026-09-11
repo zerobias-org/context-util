@@ -88,17 +88,49 @@ function sanitize(value: unknown, depth: number, path: Set<object>): unknown {
     }
 
     const out: Record<string, unknown> = {};
-    for (const key of Object.keys(object)) {
+    for (const key of ownKeys(object)) {
       if (UNSAFE_ERROR_PROPS.has(key)) {
         continue;
       }
 
-      out[key] = sanitize((object as Record<string, unknown>)[key], depth + 1, path);
+      out[key] = readAndSanitize(object as Record<string, unknown>, key, depth + 1, path);
     }
 
     return out;
   } finally {
     path.delete(object);
+  }
+}
+
+/**
+ * Own keys, or none. A Proxy can throw from its `ownKeys` trap, and losing the whole payload to a
+ * hostile object in a field nobody asked about is the wrong trade.
+ */
+function ownKeys(object: object, includeNonEnumerable = false): string[] {
+  try {
+    return includeNonEnumerable ? Object.getOwnPropertyNames(object) : Object.keys(object);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * One property, sanitized, with the read itself guarded.
+ *
+ * A getter can throw, and so can a Proxy's `get` trap. Catching per property rather than around
+ * the whole walk keeps a single hostile field from costing the message and statusCode the
+ * classifier actually reads.
+ */
+function readAndSanitize(
+  object: Record<string, unknown>,
+  key: string,
+  depth: number,
+  path: Set<object>,
+): unknown {
+  try {
+    return sanitize(object[key], depth, path);
+  } catch {
+    return '[unreadable]';
   }
 }
 
@@ -115,12 +147,12 @@ function flattenError(error: Error & Record<string, any>, depth: number, path: S
     out.stack = truncate(error.stack);
   }
 
-  for (const key of Object.getOwnPropertyNames(error)) {
+  for (const key of ownKeys(error, true)) {
     if (key in out || UNSAFE_ERROR_PROPS.has(key)) {
       continue;
     }
 
-    out[key] = sanitize(error[key], depth + 1, path);
+    out[key] = readAndSanitize(error, key, depth + 1, path);
   }
 
   const statusCode = asStatusCode(error.statusCode)

@@ -122,6 +122,30 @@ describe('toBatchLogData', () => {
     expect(String(out.message)).to.contain('[truncated]');
   });
 
+  it('loses only the hostile field, not the whole payload', () => {
+    // A throwing getter used to take out the entire report via the outer catch, including the
+    // message and statusCode the classifier reads. Guarded per property instead.
+    const err: any = Object.assign(new Error('boom'), { statusCode: 429 });
+    Object.defineProperty(err, 'bad', { get() { throw new Error('nope'); }, enumerable: true });
+
+    const out = toBatchLogData(err);
+
+    expect(out.msg).to.equal('boom');
+    expect(out.statusCode).to.equal(429);
+    expect(out.bad).to.equal('[unreadable]');
+  });
+
+  it('survives a proxy that throws from ownKeys', () => {
+    const err = Object.assign(new Error('boom'), {
+      hostile: new Proxy({}, { ownKeys() { throw new Error('nope'); }, get() { throw new Error('nope'); } }),
+    });
+
+    const out = toBatchLogData(err);
+
+    expect(() => JSON.stringify(out)).to.not.throw();
+    expect(out.msg).to.equal('boom');
+  });
+
   it('passes a plain object through and maps nothing for no data', () => {
     expect(toBatchLogData({ rows: 3 })).to.deep.equal({ rows: 3 });
     expect(toBatchLogData()).to.deep.equal({});
