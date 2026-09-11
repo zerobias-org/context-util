@@ -20,28 +20,20 @@ env:
     source: env
     required: true
     description: "GitHub username for package publishing."
-  # The PAT. settings.gradle.kts resolves build-tools from
-  # maven.pkg.github.com/zerobias-org/util, which lives in ANOTHER repository —
-  # the automatic Actions GITHUB_TOKEN is scoped to this one and cannot read it,
-  # so the credential chain has to find a real token first. Declared the same way
-  # com/dana declares it, and the workflow already maps it to secrets.READ_TOKEN.
+  # Declared the same way com/dana declares it; the workflow maps it to
+  # secrets.READ_TOKEN. settings.gradle.kts reads it as the second entry in the
+  # credential chain for maven.pkg.github.com/zerobias-org/util.
   NPM_TOKEN:
     type: string
     source: env
     required: true
     mask: true
     description: "Token for authenticating to Zerobias github packages."
-  READ_TOKEN:
-    type: string
-    source: env
-    required: true
-    mask: true
-    description: "Read token for GitHub Packages; first entry in the Gradle credential chain."
   GITHUB_TOKEN:
     source: env
     required: true
     mask: true
-    description: "Actions-provided token, scoped to this repository. Last-resort fallback only."
+    description: "Actions-provided token. Last entry in the Gradle credential chain."
 
 # ── Tool preflight ────────────────────────────────────────────────────
 require:
