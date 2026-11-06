@@ -306,6 +306,23 @@ JSONata expression evaluation:
 }
 ```
 
+**Bindings.** `applyMapping`, `applyAllMappings` and `applyAllMappingsFromQuery` take an optional last argument of
+variables every expression can read, each name with a `$` in front. A row's own fields are read without the `$`, so a
+binding never hides one, and an unbound variable is undefined.
+
+```typescript
+// The dynamic collector binds the pipeline it runs for, so ids mapped from a file can be unique to the pipeline:
+const { result } = await mapper.applyAllMappings(
+  [{ /* … */ transform: { type: 'expression', options: { expression: 'id != null ? $pipelineId & "/" & $string(id)' } } }],
+  { id: 'plan-a/space/hall' },
+  { pipelineId: '9b1c0c5e-4f60-4d6f-9a52-1b2c3d4e5f60' }
+);
+// result.id: '9b1c0c5e-4f60-4d6f-9a52-1b2c3d4e5f60/plan-a/space/hall'
+```
+
+JSONata's `&` reads an undefined operand as an empty string, so an expression that relies on a binding should only run
+where the caller passes it.
+
 #### 6. Default
 Provide fallback value:
 ```typescript

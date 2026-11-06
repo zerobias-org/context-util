@@ -2,6 +2,7 @@ import jsonata from 'jsonata';
 import { JsonataIntegration } from '../transform/JsonataIntegration.js';
 import { SourceField, DestinationField } from './types/field.types.js';
 import {
+  MappingBindings,
   MappingRule,
   MappingResult,
   ErrorHandlingStrategy
@@ -160,9 +161,11 @@ export class DataMapper {
   }
 
   /**
-   * Applies a mapping rule to source data
+   * Applies a mapping rule to source data. `bindings` are variables every `expression` transform can read, each name
+   * with a `$` in front: `{ pipelineId }` is `$pipelineId`. A row's own fields are read without the `$`, so a binding
+   * never hides one.
    */
-  async applyMapping(rule: MappingRule, sourceData: any): Promise<MappingResult> {
+  async applyMapping(rule: MappingRule, sourceData: any, bindings?: MappingBindings): Promise<MappingResult> {
     try {
       const sources = Array.isArray(rule.source) ? rule.source : [rule.source];
       let transformedValue: any;
@@ -226,7 +229,7 @@ export class DataMapper {
           if (!expression) {
             throw new Error('Expression is required for expression transform');
           }
-          transformedValue = await this.evaluateExpression(expression, sources, sourceData);
+          transformedValue = await this.evaluateExpression(expression, sources, sourceData, bindings);
           break;
         }
 
@@ -450,12 +453,13 @@ export class DataMapper {
   }
 
   /**
-   * Evaluates a JSONata expression
+   * Evaluates a JSONata expression against the rule's source fields, with `bindings` as its `$` variables.
    */
   private async evaluateExpression(
     expression: string,
     sources: SourceField[],
-    sourceData: any
+    sourceData: any,
+    bindings?: MappingBindings
   ): Promise<any> {
     // Build data context
     const dataContext: any = {};
@@ -480,7 +484,7 @@ export class DataMapper {
     // Register all transform utilities as JSONata custom functions
     JsonataIntegration.registerFunctions(compiledExpression);
 
-    const result = await compiledExpression.evaluate(dataContext);
+    const result = await compiledExpression.evaluate(dataContext, bindings);
 
     return result;
   }
@@ -881,11 +885,12 @@ export class DataMapper {
   }
 
   /**
-   * Applies all mapping rules to source data
+   * Applies all mapping rules to source data. `bindings` are passed to every rule (see applyMapping).
    */
   async applyAllMappings(
     rules: MappingRule[],
-    sourceData: any
+    sourceData: any,
+    bindings?: MappingBindings
   ): Promise<{ result: any; errors: string[] }> {
     const result: any = {};
     const errors: string[] = [];
@@ -896,7 +901,7 @@ export class DataMapper {
         continue;
       }
 
-      const mappingResult = await this.applyMapping(rule, sourceData);
+      const mappingResult = await this.applyMapping(rule, sourceData, bindings);
 
       if (mappingResult.success) {
         const destPath = rule.destination.path || rule.destination.key;
@@ -937,15 +942,16 @@ export class DataMapper {
    * (Angular UI passes `DataExplorerService.invokeFunctionRaw`; the
    * server pipeline runner passes its own producer client). The producer
    * response is normalised through `extractRows` so envelope shapes
-   * (`{ rows: [] }`, `{ items: [] }`, etc.) work without per-caller code.
+   * (`{ rows: [] }`, `{ items: [] }`, etc.) work without per-caller code. `bindings` are passed to every rule.
    */
   async applyAllMappingsFromQuery(
     invoke: InvokeFunction,
     source: QuerySourceConfig,
-    rules: MappingRule[]
+    rules: MappingRule[],
+    bindings?: MappingBindings
   ): Promise<{ result: any; errors: string[] }> {
     const raw = await invoke(source.objectId, { sql: source.sql });
     const rows = extractRows(raw);
-    return this.applyAllMappings(rules, rows);
+    return this.applyAllMappings(rules, rows, bindings);
   }
 }

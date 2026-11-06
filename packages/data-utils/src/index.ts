@@ -37,6 +37,7 @@ export type { SavedQueryRegistry } from './mapper/utils/query.js';
 export type {
   SourceField,
   DestinationField,
+  MappingBindings,
   MappingRule,
   MappingResult,
   ErrorHandlingStrategy,

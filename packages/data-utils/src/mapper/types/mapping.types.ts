@@ -31,6 +31,12 @@ export interface MappingRule {
 }
 
 /**
+ * Variables an `expression` transform can read, each name with a `$` in front: `{ pipelineId: '…' }` is `$pipelineId`.
+ * The caller passes them with the data, e.g. the dynamic collector binds the pipeline it runs for.
+ */
+export type MappingBindings = Record<string, unknown>;
+
+/**
  * Result of applying a mapping rule to data
  */
 export interface MappingResult {
